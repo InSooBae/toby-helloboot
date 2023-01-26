@@ -17,17 +17,24 @@ public class HellobootApplication {
 	public static void main(String[] args) {
 		TomcatServletWebServerFactory serverFactory = new TomcatServletWebServerFactory();
 		WebServer webServer = serverFactory.getWebServer(servletContext -> {
+
+			HelloController helloController = new HelloController();
 			servletContext.addServlet("frontcontroller", new HttpServlet() {
 				@Override
 				protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 					// 인증, 보안, 다국어, 공통 기능 등 프론트컨트롤러에서 처리
+
+					// 매핑 - 요청을 통해 들어온 내용들을 통해 어떤 로직을 수행할지 정하는 것
+					// 바인딩 - 웹 요청을 가지고 처리하는 로직 코드에서 사용할 수 있도록 새로운 형태의 타입으로 변환 ex) DTO, VO
 					if (req.getRequestURI().equals("/hello") && req.getMethod().equals(HttpMethod.GET.name())) {
 
 						String name = req.getParameter("name");
 
+						String returnVal = helloController.hello(name);
+
 						resp.setStatus(HttpStatus.OK.value());
 						resp.setContentType(MediaType.TEXT_PLAIN_VALUE);
-						resp.getWriter().println("Hello " + name);
+						resp.getWriter().println(returnVal);
 
 					} else if (req.getRequestURI().equals("/user")) {
 
