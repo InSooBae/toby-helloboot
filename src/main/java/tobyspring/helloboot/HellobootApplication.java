@@ -18,19 +18,30 @@ import java.io.IOException;
 public class HellobootApplication {
 
 	public static void main(String[] args) {
-		GenericWebApplicationContext applicationContext = new GenericWebApplicationContext();
+		// 스프링 컨테이너
+		GenericWebApplicationContext applicationContext = new GenericWebApplicationContext() {
+			@Override
+			protected void onRefresh() {
+				super.onRefresh();
+				// 서블릿 컨테이너
+				TomcatServletWebServerFactory serverFactory = new TomcatServletWebServerFactory();
+				WebServer webServer = serverFactory.getWebServer(servletContext -> {
+
+					servletContext.addServlet("dispatcherServlet", new DispatcherServlet(this)).addMapping("/*");
+
+				});
+				webServer.start();
+				// 서블릿 컨테이너
+			}
+		};
 
 		applicationContext.registerBean(HelloController.class);
 		applicationContext.registerBean(SimpleHelloService.class);
+		// 스프링 컨테이너 초기화
 		applicationContext.refresh();
+		// 스프링 컨테이너
 
-		TomcatServletWebServerFactory serverFactory = new TomcatServletWebServerFactory();
-		WebServer webServer = serverFactory.getWebServer(servletContext -> {
 
-			servletContext.addServlet("dispatcherServlet", new DispatcherServlet(applicationContext)).addMapping("/*");
-
-		});
-		webServer.start();
 	}
 
 }
