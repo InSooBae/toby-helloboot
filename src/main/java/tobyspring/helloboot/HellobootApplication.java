@@ -6,6 +6,8 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.web.context.support.GenericWebApplicationContext;
+import org.springframework.web.servlet.DispatcherServlet;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -16,7 +18,7 @@ import java.io.IOException;
 public class HellobootApplication {
 
 	public static void main(String[] args) {
-		GenericApplicationContext applicationContext = new GenericApplicationContext();
+		GenericWebApplicationContext applicationContext = new GenericWebApplicationContext();
 
 		applicationContext.registerBean(HelloController.class);
 		applicationContext.registerBean(SimpleHelloService.class);
@@ -25,33 +27,7 @@ public class HellobootApplication {
 		TomcatServletWebServerFactory serverFactory = new TomcatServletWebServerFactory();
 		WebServer webServer = serverFactory.getWebServer(servletContext -> {
 
-			servletContext.addServlet("frontcontroller", new HttpServlet() {
-				@Override
-				protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-					// 인증, 보안, 다국어, 공통 기능 등 프론트컨트롤러에서 처리
-
-					// 매핑 - 요청을 통해 들어온 내용들을 통해 어떤 로직을 수행할지 정하는 것
-					// 바인딩 - 웹 요청을 가지고 처리하는 로직 코드에서 사용할 수 있도록 새로운 형태의 타입으로 변환 ex) DTO, VO
-					if (req.getRequestURI().equals("/hello") && req.getMethod().equals(HttpMethod.GET.name())) {
-
-						String name = req.getParameter("name");
-
-						HelloController helloController = applicationContext.getBean(HelloController.class);
-
-						String returnVal = helloController.hello(name);
-
-						resp.setStatus(HttpStatus.OK.value());
-						resp.setContentType(MediaType.TEXT_PLAIN_VALUE);
-						resp.getWriter().println(returnVal);
-
-					} else if (req.getRequestURI().equals("/user")) {
-
-					} else {
-						resp.setStatus(HttpStatus.NOT_FOUND.value());
-					}
-
-				}
-			}).addMapping("/*");
+			servletContext.addServlet("dispatcherServlet", new DispatcherServlet(applicationContext)).addMapping("/*");
 
 		});
 		webServer.start();
