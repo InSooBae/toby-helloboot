@@ -2,10 +2,15 @@ package tobyspring.helloboot;
 
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
 import org.springframework.boot.web.server.WebServer;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
@@ -15,11 +20,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+@Configuration
+@ComponentScan
 public class HellobootApplication {
+
 
 	public static void main(String[] args) {
 		// 스프링 컨테이너
-		GenericWebApplicationContext applicationContext = new GenericWebApplicationContext() {
+		AnnotationConfigWebApplicationContext applicationContext = new AnnotationConfigWebApplicationContext() {
 			@Override
 			protected void onRefresh() {
 				super.onRefresh();
@@ -35,8 +43,8 @@ public class HellobootApplication {
 			}
 		};
 
-		applicationContext.registerBean(HelloController.class);
-		applicationContext.registerBean(SimpleHelloService.class);
+		// 자바 코드로 된 구성 정보 클래스 등록
+		applicationContext.register(HellobootApplication.class);
 		// 스프링 컨테이너 초기화
 		applicationContext.refresh();
 		// 스프링 컨테이너
