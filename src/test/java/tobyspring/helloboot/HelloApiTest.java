@@ -27,4 +27,16 @@ public class HelloApiTest {
         Assertions.assertThat(res.getBody()).isEqualTo("Hello Spring");
 
     }
+
+    @Test
+    public void failsHelloApi() throws Exception {
+        // http localhost:8080/hello?name=Spring
+
+        TestRestTemplate rest = new TestRestTemplate();
+
+        ResponseEntity<String> res
+                = rest.getForEntity("http://localhost:8080/hello?name=", String.class);
+
+        Assertions.assertThat(res.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 }
